@@ -8,6 +8,8 @@ import datetime
 import time
 import glob
 import sys
+import microgear.client as client
+import logging
 from basic import Ui_Form
 from PyQt5.QtGui import QPixmap,QImage,QIcon
 from PyQt5.QtCore import Qt, QThread, QTimer,QSize
@@ -25,6 +27,9 @@ class StartWindows(QMainWindow):
     
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self.update)
+     
+       
+        
         
        
          #User
@@ -47,7 +52,30 @@ class StartWindows(QMainWindow):
         ret,self.frame =self.camera.read()
         self.frame=cv2.flip(self.frame,1)
         cv2.imshow("img", img)  
-        '''    
+        '''
+
+    def connection():
+       print ("Now I am connected with netpie")
+
+    def subscription(topic,message):
+        logging.info(topic+" "+message)
+
+    def disconnect():
+        logging.debug("disconnect is work")
+
+    appid = "ProjectOs"
+    gearkey = "B0r3CNqaRtDjDf0"
+    gearsecret ="qRjL4WFFGCZqXY6hkpHFKkLIx"
+    client.create(gearkey,gearsecret,appid,{'debugmode': True})
+    client.setname("doraemon")
+    client.on_connect = connection
+    client.on_message = subscription
+    client.subscribe("/mails")
+    
+
+
+    client.connect()
+        
         
     def yolo_tiny(self):
      
@@ -63,6 +91,7 @@ class StartWindows(QMainWindow):
     def update(self):
         
         if(self.start ==0):
+            print("QR")
             
             ret,self.frame =self.camera.read()
             
@@ -74,6 +103,7 @@ class StartWindows(QMainWindow):
                     
                     print("Data", (obj.data))
                     self.Qr_User=str(obj.data)
+                    
                    
                 
             print(self.Qr_User)
@@ -103,8 +133,9 @@ class StartWindows(QMainWindow):
                 
                 if int(eachObject["percentage_probability"]) >=50 :
                     self.Point+=1
+                    
                     print(self.Point)
-                 
+             
             #resize
             
             detected_image_array = cv2.resize(detected_image_array,(891,501))
@@ -117,7 +148,7 @@ class StartWindows(QMainWindow):
             self.ui.label.setPixmap(pixmap_image)
             self.ui.user_id.setText(self.Qr_User)
             self.ui.user_point.setText(str(self.Point))
-           
+               
                   
             self.ui.label.show();
     '''
@@ -134,8 +165,8 @@ class StartWindows(QMainWindow):
         #ส่งข้อมูลช่วงนี้ก่อนแล้วเคลียค่า
         print(self.Qr_User)
         print(self.Point)
-        
-        #self.start=0
+        client.publish("/temp",str(self.Point))
+        self.start=0
         self.Qr_User=""
         self.Point=0
         print(self.Qr_User)
