@@ -85,7 +85,7 @@ class StartWindows(QMainWindow):
         self.detector = ObjectDetection()
         self.detector.setModelTypeAsTinyYOLOv3()
         self.detector.setModelPath( os.path.join(self.execution_path , "yolo-tiny.h5"))
-        self.detector.loadModel(detection_speed="fast")
+        self.detector.loadModel(detection_speed="flash")
         print("###you are use yolo_tiny model###")
         
     def update(self):
@@ -101,11 +101,14 @@ class StartWindows(QMainWindow):
             for obj in decodedObjects:
                 if obj.data:
                     
-                    print("Data", (obj.data))
+                    
                     self.Qr_User=str(obj.data)
+                    self.Qr_User=self.Qr_User[2:len(self.Qr_User)-1]
+                    
                     
                    
-                
+            
+            
             print(self.Qr_User)
             self.frame=cv2.flip(self.frame,1)
             self.frame = cv2.resize(self.frame,(891,501))
@@ -133,6 +136,7 @@ class StartWindows(QMainWindow):
                 
                 if int(eachObject["percentage_probability"]) >=50 :
                     self.Point+=1
+                    time.sleep(0.5)
                     
                     print(self.Point)
              
@@ -151,7 +155,8 @@ class StartWindows(QMainWindow):
                
                   
             self.ui.label.show();
-    '''
+            
+    ''' 
     def score():
         d=self.detections
         for eachObject in d:
@@ -165,10 +170,14 @@ class StartWindows(QMainWindow):
         #ส่งข้อมูลช่วงนี้ก่อนแล้วเคลียค่า
         print(self.Qr_User)
         print(self.Point)
-        client.publish("/temp",str(self.Point))
+        client.publish("/Point2",str(self.Point))
+        client.publish("/Name",str(self.Qr_User))
+        client.publish("/Mix",(str(self.Qr_User)+","+str(self.Point)))
+        
         self.start=0
         self.Qr_User=""
         self.Point=0
+        self.ui.user_point.setText(str(self.Point))
         print(self.Qr_User)
         print(self.Point)
 
